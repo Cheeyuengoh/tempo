@@ -6,11 +6,12 @@ module.exports = {
         .setName("pause")
         .setDescription("Pause current music"),
     async execute(client, interaction) {
-        if(!client.player){
-            return await interaction.reply("Play a music first");
+        const queue = client.player.getQueue(interaction.guild.id);
+        if (!queue) {
+            return interaction.reply("Play a music first");
         }
-        
-        client.player.pause();
+
+        queue.pause();
         await interaction.reply("Paused");
     }
 }

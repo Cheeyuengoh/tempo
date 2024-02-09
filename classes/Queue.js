@@ -1,4 +1,6 @@
-const { joinVoiceChannel, createAudioResource } = require("@discordjs/voice");
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require("@discordjs/voice");
+const Music = require("./Music");
+const play = require("play-dl");
 
 module.exports = class Queue {
     constructor(guild) {
@@ -8,20 +10,45 @@ module.exports = class Queue {
         this.tracks = new Array();
     }
 
-    connect(channel, player) {
+    connect(channel) {
         this.connection = joinVoiceChannel({
-            channelId: channel.channelId,
-            guildId: this.guild.guildId,
+            channelId: channel.id,
+            guildId: this.guild.id,
             adapterCreator: this.guild.voiceAdapterCreator
+        });
+
+        const player = createAudioPlayer();
+        player.on(AudioPlayerStatus.Idle, () => {
+            this.current = null;
+            if (this.tracks.length) {
+                this.play();
+            }
         });
 
         this.connection.subscribe(player);
     }
 
-    addTrack(stream) {
-        const resource = createAudioResource(stream.stream, {
-            inputType: stream.type
-        });
-        this.tracks.push(resource);
+    addTrack(music) {
+        this.tracks.push(new Music(music));
+    }
+
+    async play() {
+        this.current = this.tracks[0];
+        this.tracks.shift();
+        const stream = await play.stream(this.current.url);
+        const resource = createAudioResource(stream.stream, { inputType: stream.type });
+        this.connection.state.subscription.player.play(resource);
+    }
+
+    pause() {
+        this.connection.state.subscription.player.pause();
+    }
+
+    resume() {
+        this.connection.state.subscription.player.unpause();
+    }
+
+    skip() {
+        this.connection.state.subscription.player.stop();
     }
 }

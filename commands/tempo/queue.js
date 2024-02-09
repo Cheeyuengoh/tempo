@@ -5,10 +5,16 @@ module.exports = {
         .setName("queue")
         .setDescription("Display current queue"),
     async execute(client, interaction) {
-        if (!client.player) {
-            return await interaction.reply("Play a music first");
+        const queue = client.player.getQueue(interaction.guild.id);
+        if (!queue) {
+            return interaction.reply("Play a music first");
         }
 
-        await interaction.reply("Queue:\n" + client.player.queue.join("\n"));
+        const tracksString = queue.tracks.map((track, i) => {
+            return `${i + 1}. **${track.title}** -<@ ${track.requestedBy}`;
+        });
+
+        console.log(interaction.guild);
+        await interaction.reply(`Now Playing: **${queue.current.title}** -<@ ${queue.requestedBy}\n` + tracksString.join("\n"));
     }
 }

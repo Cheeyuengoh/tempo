@@ -16,30 +16,52 @@ module.exports = {
             return interaction.reply("Please join a voice channel");
         }
 
-        try {
-            const queue = client.player.createQueue(client.guild);
-            if (!queue.connection) {
-                queue.connect(interaction.member.voice.channel);
-            }
+        const music = await play.video_basic_info(url);
+        let queue = client.player.getQueue(interaction.guild.id);
 
-            const stream = await play.stream(url);
-            queue.addTrack(stream);
+        // if (!queue) {
+        //     queue = client.player.createQueue(interaction.guild);
+        //     queue.addTrack({
+        //         url: music.video_details.url,
+        //         title: music.video_details.title,
+        //         duration: music.video_details.durationInSec,
+        //         requestedBy: interaction.member.id
+        //     });
+        //     queue.connect(interaction.member.voice.channel);
+        //     queue.play();
+        // } else {
+        //     queue.addTrack({
+        //         url: music.video_details.url,
+        //         title: music.video_details.title,
+        //         duration: music.video_details.durationInSec,
+        //         requestedBy: interaction.member.id
+        //     });
+        //     return interaction.reply(`Added to queue`);
+        // }
 
-            // const connection = joinVoiceChannel({
-            //     channelId: interaction.member.voice.channelId,
-            //     guildId: interaction.guildId,
-            //     adapterCreator: interaction.guild.voiceAdapterCreator
-            // });
-
-            // if (!client.player) {
-            //     client.player = new Player(connection);
-            // }
-
-            // client.player.play(url);
-
-            await interaction.reply(`Playing ${url}`);
-        } catch (error) {
-            await interaction.reply(`There was an error playing music \`${command.data.name}\`:\n\`${error.message}\``);
+        if (!queue) {
+            queue = client.player.createQueue(interaction.guild);
         }
+
+        if (!queue.current && !queue.tracks.length) {
+            queue.addTrack({
+                url: music.video_details.url,
+                title: music.video_details.title,
+                duration: music.video_details.durationInSec,
+                requestedBy: interaction.member.id
+            });
+            queue.connect(interaction.member.voice.channel);
+            queue.play();
+        } else {
+            queue.addTrack({
+                url: music.video_details.url,
+                title: music.video_details.title,
+                duration: music.video_details.durationInSec,
+                requestedBy: interaction.member.id
+            });
+            return interaction.reply("Added to queue");
+        }
+
+        await interaction.reply(`Playing ${queue.current.title}`);
     }
 }
