@@ -1,0 +1,21 @@
+{
+  "name": "tempo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "deploy-commands": "node --env-file=.env deploy-commands.js",
+    "start": "node --watch --env-file=.env bot.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/voice": "^0.16.1",
+    "discord.js": "^14.14.1",
+    "libsodium-wrappers": "^0.7.13",
+    "play-dl": "^1.9.7",
+    "ytdl-core": "^4.11.5"
+  }
+}
