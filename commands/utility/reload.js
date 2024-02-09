@@ -11,11 +11,13 @@ module.exports = {
                 .setDescription('The command to reload.')
                 .setRequired(true)),
     async execute(_client, interaction) {
+        await interaction.deferReply();
+
         const commandName = interaction.options.getString('command', true).toLowerCase();
         const command = interaction.client.commands.get(commandName);
 
         if (!command) {
-            return interaction.reply(`There is no command with name \`${commandName}\`!`);
+            return await interaction.editReply(`There is no command with name \`${commandName}\`!`);
         }
 
         try {
@@ -37,10 +39,10 @@ module.exports = {
                 }
             }
 
-            await interaction.reply(`Command \`${newCommand.data.name}\` was reloaded!`);
+            await interaction.editReply(`Command \`${newCommand.data.name}\` was reloaded!`);
         } catch (error) {
-            console.error(error);
-            await interaction.reply(`There was an error while reloading a command \`${command.data.name}\`:\n\`${error.message}\``);
+            console.log(error);
+            await interaction.editReply(`There was an error while reloading a command \`${command.data.name}\`:\n\`${error.message}\``);
         }
     },
 };

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const play = require("play-dl");
 
 module.exports = {
@@ -10,45 +10,31 @@ module.exports = {
                 .setDescription("Provide a url")
                 .setRequired(true)),
     async execute(client, interaction) {
-        const url = interaction.options.getString('url', true);
+        await interaction.deferReply();
+        await interaction.deleteReply();
 
         if (!interaction.member.voice.channel) {
-            return interaction.reply("Please join a voice channel");
+            let embed = new EmbedBuilder()
+                .setTitle("Please join a voice channel before executing this command")
+                .setColor("Red");
+            return await interaction.channel.send({ embeds: [embed] });
         }
 
+        const url = interaction.options.getString('url', true);
         const music = await play.video_basic_info(url);
         let queue = client.player.getQueue(interaction.guild.id);
 
-        // if (!queue) {
-        //     queue = client.player.createQueue(interaction.guild);
-        //     queue.addTrack({
-        //         url: music.video_details.url,
-        //         title: music.video_details.title,
-        //         duration: music.video_details.durationInSec,
-        //         requestedBy: interaction.member.id
-        //     });
-        //     queue.connect(interaction.member.voice.channel);
-        //     queue.play();
-        // } else {
-        //     queue.addTrack({
-        //         url: music.video_details.url,
-        //         title: music.video_details.title,
-        //         duration: music.video_details.durationInSec,
-        //         requestedBy: interaction.member.id
-        //     });
-        //     return interaction.reply(`Added to queue`);
-        // }
-
         if (!queue) {
-            queue = client.player.createQueue(interaction.guild);
+            queue = client.player.createQueue({ guild: interaction.guild, channel: interaction.channel });
         }
 
         if (!queue.current && !queue.tracks.length) {
+            console.log(interaction.member);
             queue.addTrack({
                 url: music.video_details.url,
                 title: music.video_details.title,
                 duration: music.video_details.durationInSec,
-                requestedBy: interaction.member.id
+                requestedBy: interaction.member.user
             });
             queue.connect(interaction.member.voice.channel);
             queue.play();
@@ -57,11 +43,19 @@ module.exports = {
                 url: music.video_details.url,
                 title: music.video_details.title,
                 duration: music.video_details.durationInSec,
-                requestedBy: interaction.member.id
+                requestedBy: interaction.member.user
             });
-            return interaction.reply("Added to queue");
+            let embed = new EmbedBuilder()
+                .setTitle("Added to queue")
+                .setDescription(`**${music.video_details.title}**`)
+                .setColor("Green");
+            return await interaction.channel.send({ embeds: [embed] });
         }
 
-        await interaction.reply(`Playing ${queue.current.title}`);
+        let embed = new EmbedBuilder()
+            .setTitle("Now playing")
+            .setDescription(`**${queue.current.title}**`)
+            .setColor("Green");
+        await interaction.channel.send({ embeds: [embed] });
     }
 }
