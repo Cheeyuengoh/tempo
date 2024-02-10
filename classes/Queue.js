@@ -47,7 +47,8 @@ module.exports = class Queue {
     async play() {
         this.current = this.tracks[0];
         this.tracks.shift();
-        const stream = await play.stream(this.current.url);
+        console.log(this.current);
+        const stream = await play.stream(this.current.resourceURL);
         const resource = createAudioResource(stream.stream, { inputType: stream.type });
         this.connection.state.subscription.player.play(resource);
     }

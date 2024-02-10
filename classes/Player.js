@@ -1,8 +1,11 @@
 const Queue = require("./Queue");
+const play = require("play-dl");
+const SpotifyAPI = require("./SpotifyAPI");
 
 module.exports = class Player {
     constructor() {
         this.queues = new Map();
+        this.spotifyAPI = new SpotifyAPI();
     }
 
     getQueue(guildId) {

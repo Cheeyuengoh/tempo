@@ -20,8 +20,28 @@ module.exports = {
             return await interaction.channel.send({ embeds: [embed] });
         }
 
-        const url = interaction.options.getString('url', true);
-        const music = await play.video_basic_info(url);
+        const music = {
+            requestedBy: interaction.member.user,
+            providedURL: interaction.options.getString('url', true)
+        };
+        music.type = await play.validate(music.providedURL);
+
+        if (music.type === "yt_video") {
+            const info = await play.video_basic_info(music.providedURL);
+            music.resourceURL = info.video_details.url;
+            music.title = info.video_details.title;
+            music.duration = info.video_details.durationInSec;
+        }
+
+        if (music.type === "sp_track") {
+            const spotifyInfo = await client.player.spotifyAPI.spotify(music.providedURL);
+            const searched = await play.search(`${spotifyInfo.artists[0].name} ${spotifyInfo.name}`);
+            const youtubeInfo = await play.video_basic_info(searched[0].url);
+            music.resourceURL = youtubeInfo.video_details.url;
+            music.title = youtubeInfo.video_details.title;
+            music.duration = youtubeInfo.video_details.durationInSec;
+        }
+
         let queue = client.player.getQueue(interaction.guild.id);
 
         if (!queue) {
@@ -29,25 +49,14 @@ module.exports = {
         }
 
         if (!queue.current && !queue.tracks.length) {
-            console.log(interaction.member);
-            queue.addTrack({
-                url: music.video_details.url,
-                title: music.video_details.title,
-                duration: music.video_details.durationInSec,
-                requestedBy: interaction.member.user
-            });
+            queue.addTrack(music);
             queue.connect(interaction.member.voice.channel);
             queue.play();
         } else {
-            queue.addTrack({
-                url: music.video_details.url,
-                title: music.video_details.title,
-                duration: music.video_details.durationInSec,
-                requestedBy: interaction.member.user
-            });
+            queue.addTrack(music);
             let embed = new EmbedBuilder()
                 .setTitle("Added to queue")
-                .setDescription(`**${music.video_details.title}**`)
+                .setDescription(`**${music.title}**`)
                 .setColor("Green");
             return await interaction.channel.send({ embeds: [embed] });
         }

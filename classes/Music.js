@@ -1,6 +1,8 @@
 module.exports = class Music {
-    constructor({ url, title, duration, requestedBy }) {
-        this.url = url;
+    constructor({ type, providedURL, resourceURL, title, duration, requestedBy }) {
+        this.type = type;
+        this.providedURL = providedURL;
+        this.resourceURL = resourceURL;
         this.title = title;
         this.duration = duration;
         this.requestedBy = requestedBy;
