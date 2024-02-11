@@ -60,7 +60,17 @@ module.exports = class Queue {
         this.connection.state.subscription.player.unpause();
     }
 
-    skip() {
-        this.connection.state.subscription.player.stop();
+    async skip() {
+        await this.connection.state.subscription.player.stop();
+    }
+
+    async skipTo(position) {
+        const index = position - 1;
+        if (index >= this.tracks.length) {
+            throw new Error("Position provided is more than queue length");
+        }
+
+        this.tracks = this.tracks.slice(index);
+        await this.skip();
     }
 }

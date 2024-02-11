@@ -2,8 +2,13 @@ const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("queue")
-        .setDescription("Display current queue"),
+        .setName("skipto")
+        .setDescription("Skip to position of music")
+        .addIntegerOption(option =>
+            option.setName("position")
+                .setDescription("Position of music in queue")
+                .setMinValue(1)
+                .setRequired(true)),
     async execute(client, interaction) {
         await interaction.deferReply();
         await interaction.deleteReply();
@@ -23,16 +28,13 @@ module.exports = {
             return await interaction.channel.send({ embeds: [embed] });
         }
 
-        const tracksString = queue.tracks.map((track, i) => {
-            return `${i + 1}. **${track.title}** --<@ ${track.requestedBy}`;
-        });
-
-        tracksString.unshift(`Now playing: **${queue.current.title}** --<@ ${queue.current.requestedBy}`);
-
-        let embed = new EmbedBuilder()
-            .setTitle("Queue")
-            .setDescription(tracksString.join("\n"))
-            .setColor("Green");
-        await interaction.channel.send({ embeds: [embed] });
+        try {
+            queue.skipTo(interaction.options.getInteger("position"));
+        } catch (error) {
+            let embed = new EmbedBuilder()
+                .setTitle(error.message)
+                .setColor("Red")
+            await interaction.channel.send({ embeds: [embed] });
+        }
     }
 }

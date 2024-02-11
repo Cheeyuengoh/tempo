@@ -22,9 +22,9 @@ module.exports = {
 
         const music = {
             requestedBy: interaction.member.user,
-            providedURL: interaction.options.getString('url', true)
+            providedURL: interaction.options.getString("url")
         };
-        
+
         music.type = await play.validate(music.providedURL);
 
         if (music.type === "yt_video") {
