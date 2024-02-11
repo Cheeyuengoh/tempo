@@ -2,8 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("queue")
-        .setDescription("Display current queue"),
+        .setName("removelast")
+        .setDescription("Remove last song of queue"),
     async execute(client, interaction) {
         await interaction.deferReply();
         await interaction.deleteReply();
@@ -23,15 +23,11 @@ module.exports = {
             return await interaction.channel.send({ embeds: [embed] });
         }
 
-        const tracksString = queue.tracks.map((track, i) => {
-            return `${i + 2}. **${track.title}** -<@ ${track.requestedBy}`;
-        });
-
-        tracksString.unshift(`1. **${queue.current.title}** -<@ ${queue.current.requestedBy} (Now playing)`);
+        const removed = queue.tracks.pop();
 
         let embed = new EmbedBuilder()
-            .setTitle("Queue")
-            .setDescription(tracksString.join("\n"))
+            .setTitle("Removed from queue")
+            .setDescription(removed.title)
             .setColor("Green");
         await interaction.channel.send({ embeds: [embed] });
     }
