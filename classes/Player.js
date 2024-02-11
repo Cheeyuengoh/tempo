@@ -21,4 +21,8 @@ module.exports = class Player {
         this.queues.set(guild.id, new Queue({ guild, channel }));
         return this.queues.get(guild.id);
     }
+
+    deleteQueue(guildId) {
+        this.queues.set(guildId, null);
+    }
 }
