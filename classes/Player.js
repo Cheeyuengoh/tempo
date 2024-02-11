@@ -6,6 +6,11 @@ module.exports = class Player {
     constructor() {
         this.queues = new Map();
         this.spotifyAPI = new SpotifyAPI();
+        play.setToken({
+            soundcloud: {
+                client_id: process.env.SOUNDCLOUD_CLIENT_ID
+            }
+        });
     }
 
     getQueue(guildId) {

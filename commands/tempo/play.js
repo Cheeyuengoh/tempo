@@ -24,6 +24,7 @@ module.exports = {
             requestedBy: interaction.member.user,
             providedURL: interaction.options.getString('url', true)
         };
+        
         music.type = await play.validate(music.providedURL);
 
         if (music.type === "yt_video") {
@@ -40,6 +41,13 @@ module.exports = {
             music.resourceURL = youtubeInfo.video_details.url;
             music.title = youtubeInfo.video_details.title;
             music.duration = youtubeInfo.video_details.durationInSec;
+        }
+
+        if (music.type === "so_track") {
+            const soundcloudInfo = await play.soundcloud(music.providedURL);
+            music.resourceURL = soundcloudInfo.url;
+            music.title = soundcloudInfo.name;
+            music.duration = soundcloudInfo.durationInSec;
         }
 
         let queue = client.player.getQueue(interaction.guild.id);
